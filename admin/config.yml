@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: jcutterwind/giacomotagliaventi.github.io
+  repo: jcutterwind.github.io
   branch: main
   client_id: Ov23liUXdOT00sN00j7o
 
