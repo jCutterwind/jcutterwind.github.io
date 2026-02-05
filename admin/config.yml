@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: jcutterwind.github.io
+  repo: jcutterwind/jcutterwind.github.io
   branch: main
   client_id: Ov23liUXdOT00sN00j7o
 
