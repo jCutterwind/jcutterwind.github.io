@@ -2,6 +2,7 @@ backend:
   name: github
   repo: jcutterwind/giacomotagliaventi.github.io
   branch: main
+  client_id: Ov23liUXdOT00sN00j7o
 
 media_folder: "public/uploads"
 public_folder: "/uploads"
