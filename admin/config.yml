@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: TUOUSERNAME/TUOUSERNAME.github.io
+  repo: jcutterwind/giacomotagliaventi.github.io
   branch: main
 
 media_folder: "public/uploads"
