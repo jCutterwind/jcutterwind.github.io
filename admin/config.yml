@@ -1,10 +1,12 @@
+local_backend: true
+
 backend:
   name: github
   repo: jcutterwind/jcutterwind.github.io
   branch: main
   client_id: Ov23liUXdOT00sN00j7o
 
-media_folder: "public/uploads"
+media_folder: "uploads"
 public_folder: "/uploads"
 
 collections:
@@ -12,12 +14,13 @@ collections:
     label: "Projects"
     folder: "content/projects"
     create: true
-    slug: "{{slug}}"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Language", name: "lang", widget: "select", options: ["it", "en"] }
-      - { label: "Short Description", name: "description", widget: "text" }
-      - { label: "Cover Image", name: "cover", widget: "image" }
-      - { label: "Tags", name: "tags", widget: "list" }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Publish Date", name: "date", widget: "datetime"}
+      - {label: "Language", name: "lang", widget: "select", options: ["en", "it"], default: "en"}
+      - {label: "Tags", name: "tags", widget: "list", default: ["Game Dev", "Music"]}
+      - {label: "Cover Image", name: "image", widget: "image"}
+      - {label: "Short Description", name: "description", widget: "text"}
+      - {label: "Body", name: "body", widget: "markdown"}
 
