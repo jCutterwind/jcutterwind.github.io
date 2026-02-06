@@ -6,13 +6,13 @@ backend:
   branch: main
   client_id: Ov23liUXdOT00sN00j7o
 
-media_folder: "uploads"
+media_folder: "public/uploads"
 public_folder: "/uploads"
 
 collections:
   - name: "projects"
     label: "Projects"
-    folder: "content/projects"
+    folder: "src/content/projects"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
