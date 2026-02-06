@@ -1,0 +1,6 @@
+title: My Game Portfolio
+# This tells GitHub to look for your projects in content/projects
+collections:
+  projects:
+    output: true
+    directory: "content/projects"
