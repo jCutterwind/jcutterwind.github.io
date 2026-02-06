@@ -1,17 +1,89 @@
 ---
+// 1. Get the data
+import { getCollection } from 'astro:content';
+const allProjects = await getCollection('projects');
 
+// 2. Sort by date (newest first)
+const sortedProjects = allProjects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// 3. Get unique tags for the filter buttons
+const allTags = [...new Set(allProjects.flatMap(project => project.data.tags))];
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <title>My Portfolio</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <style>
+      /* Quick CSS for the demo */
+      body { background: #111; color: white; font-family: sans-serif; padding: 2rem; }
+      
+      .filter-bar { margin-bottom: 2rem; display: flex; gap: 10px; }
+      .filter-btn { padding: 8px 16px; background: #333; color: white; border: none; cursor: pointer; border-radius: 4px;}
+      .filter-btn:hover, .filter-btn.active { background: #555; }
+
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+      
+      .card { background: #222; border-radius: 8px; overflow: hidden; transition: transform 0.2s; text-decoration: none; color: white; display: block; }
+      .card:hover { transform: translateY(-5px); }
+      .card img { width: 100%; height: 200px; object-fit: cover; }
+      .content { padding: 1rem; }
+      .tags { display: flex; gap: 5px; margin-top: 10px; }
+      .tag { font-size: 0.8rem; background: #444; padding: 2px 6px; border-radius: 4px; color: #ccc;}
+    </style>
+  </head>
+  <body>
+
+    <h1>My Games & Music</h1>
+
+    <!-- Filter Buttons -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      {allTags.map((tag) => (
+        <button class="filter-btn" data-filter={tag}>{tag}</button>
+      ))}
+    </div>
+
+    <!-- The Grid -->
+    <div class="grid">
+      {sortedProjects.map((project) => (
+        <a href={`/projects/${project.slug}`} class="card project-item" data-tags={project.data.tags.join(',')}>
+          <img src={project.data.image} alt={project.data.title} />
+          <div class="content">
+            <h3>{project.data.title}</h3>
+            <p>{project.data.description}</p>
+            <div class="tags">
+              {project.data.tags.map(tag => <span class="tag">{tag}</span>)}
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <script>
+      // CLIENT SIDE FILTERING LOGIC
+      const buttons = document.querySelectorAll('.filter-btn');
+      const items = document.querySelectorAll('.project-item');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Remove active class from all
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const filter = btn.getAttribute('data-filter');
+
+          items.forEach(item => {
+            const tags = item.getAttribute('data-tags');
+            if (filter === 'all' || tags.includes(filter)) {
+              (item as HTMLElement).style.display = 'block';
+            } else {
+              (item as HTMLElement).style.display = 'none';
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
