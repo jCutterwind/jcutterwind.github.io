@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+
+// 1. Tell Astro to generate a page for every single project found in the CMS
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map(project => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+// 2. Get the data for the specific project being viewed
+const { project } = Astro.props;
+const { Content } = await project.render(); // This renders the Markdown body text
+---
+
+<html lang="en">
+  <head>
+    <title>{project.data.title}</title>
+    <style>
+      body { background: #111; color: white; font-family: sans-serif; margin: 0; }
+      .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+      
+      /* Header Image */
+      .hero-img { width: 100%; height: 400px; object-fit: cover; border-radius: 12px; }
+      
+      /* Typography */
+      h1 { font-size: 3rem; margin-bottom: 0.5rem; color: #fff; }
+      .date { color: #888; font-size: 0.9rem; margin-bottom: 2rem; display: block; }
+      
+      /* The Markdown Content */
+      .prose { line-height: 1.6; font-size: 1.1rem; color: #ccc; }
+      .prose img { max-width: 100%; border-radius: 8px; margin: 2rem 0; }
+      .prose h2 { color: white; margin-top: 2rem; }
+      
+      /* Back Button */
+      .back-link { display: inline-block; margin-bottom: 2rem; color: #4af; text-decoration: none; }
+      .back-link:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="/" class="back-link">← Back to Portfolio</a>
+      
+      <!-- Cover Image -->
+      <img src={project.data.image} class="hero-img" alt={project.data.title} />
+      
+      <!-- Title & Date -->
+      <h1>{project.data.title}</h1>
+      <span class="date">{project.data.date.toDateString()}</span>
+      
+      <!-- The Main Content (Markdown) -->
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </body>
+</html>
