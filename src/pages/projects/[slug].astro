@@ -31,6 +31,10 @@ const videoId = getYoutubeEmbed(project.data.video);
   <head>
     <title>{project.data.en.title}</title>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script is:inline>
+      const savedLang = localStorage.getItem('prefLang') || 'en';
+      document.documentElement.className = 'show-' + savedLang;
+    </script>
     <style>
       :root { --accent: #4af; }
       body { background: #111; color: #ddd; font-family: sans-serif; margin: 0; line-height: 1.6; }
@@ -48,9 +52,6 @@ const videoId = getYoutubeEmbed(project.data.video);
       .lang-btn { background: none; border: none; color: #888; padding: 5px 15px; cursor: pointer; border-radius: 15px; font-weight: bold; }
       .lang-btn.active { background: var(--accent); color: #000; }
 
-      body.show-en .lang-it { display: none !important; }
-      body.show-it .lang-en { display: none !important; }
-
       h1 { font-size: 3rem; color: white; margin-bottom: 0.5rem; }
       .date { color: #666; display: block; margin-bottom: 2rem; }
       .back-link { color: var(--accent); text-decoration: none; display: inline-block; margin-bottom: 1rem; }
@@ -59,7 +60,12 @@ const videoId = getYoutubeEmbed(project.data.video);
       .prose h2 { color: white; margin-top: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
       .prose a { color: var(--accent); }
       .prose img { max-width: 100%; border-radius: 8px; }
+
+      html.show-en .lang-it { display: none !important; }
+      html.show-it .lang-en { display: none !important; }
+        .lang-btn.active { background: #4af; color: black; }
     </style>
+
   </head>
   <body class="show-en">
     
@@ -69,7 +75,7 @@ const videoId = getYoutubeEmbed(project.data.video);
     </div>
 
     <div class="container">
-      <a href={base} class="back-link">← Back</a>
+      <a href={base} class="back-link">&larr; Back to Portfolio</a>
 
       <!-- MEDIA SECTION: Video if available, otherwise Image -->
       <div class="media-container" data-aos="fade-down">
@@ -101,16 +107,23 @@ const videoId = getYoutubeEmbed(project.data.video);
     </div>
 
     <script is:inline src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script is:inline>
-      AOS.init(); 
+<script is:inline>
+  AOS.init(); 
 
-      function setLang(lang) {
-        document.body.className = 'show-' + lang;
-        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`button[onclick="setLang('${lang}')"]`).classList.add('active');
-        localStorage.setItem('prefLang', lang);
-      }
-      if(localStorage.getItem('prefLang') === 'it') setLang('it');
-    </script>
+  const currentLang = localStorage.getItem('prefLang') || 'en';
+  updateButtons(currentLang);
+
+  function setLang(lang) {
+    localStorage.setItem('prefLang', lang);
+    document.documentElement.className = 'show-' + lang;
+    updateButtons(lang);
+  }
+
+  function updateButtons(lang) {
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtns = document.querySelectorAll(`button[onclick="setLang('${lang}')"]`);
+    activeBtns.forEach(b => b.classList.add('active'));
+  }
+</script>
   </body>
 </html>

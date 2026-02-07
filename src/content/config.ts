@@ -3,21 +3,24 @@ import { z, defineCollection } from 'astro:content';
 const projectsCollection = defineCollection({
   type: 'content',
   schema: z.object({
+    // Shared fields
     date: z.date(),
     image: z.string(),
-    tags: z.array(z.string()),
-    video: z.string().optional(), // New Video Field
+    tags: z.array(z.string()).optional(), // Optional just in case
+    video: z.string().optional(),         // Optional because not every game has a video
     
-    // New Language Objects
+    // English Data
     en: z.object({
       title: z.string(),
       description: z.string(),
-      // Body is handled differently in object widgets, we might need a workaround or just use the raw string
-      // For Decap 'object' widgets with markdown, Astro treats them as strings usually.
+      body: z.string().optional(), // The CMS saves the body text here
     }),
+
+    // Italian Data
     it: z.object({
       title: z.string(),
       description: z.string(),
+      body: z.string().optional(),
     }),
   }),
 });
