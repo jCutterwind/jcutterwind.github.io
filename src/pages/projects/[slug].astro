@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
+import { marked } from 'marked'; // Library to parse markdown string
 
-// 1. Tell Astro to generate a page for every single project found in the CMS
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
   return projects.map(project => ({
@@ -10,50 +10,107 @@ export async function getStaticPaths() {
   }));
 }
 
-// 2. Get the data for the specific project being viewed
 const { project } = Astro.props;
-const { Content } = await project.render(); // This renders the Markdown body text
+const base = import.meta.env.BASE_URL;
+
+// Parse the Markdown strings into HTML
+const contentEn = marked.parse(project.data.en.body);
+const contentIt = marked.parse(project.data.it.body);
+
+// Helper to get YouTube Embed ID
+function getYoutubeEmbed(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+const videoId = getYoutubeEmbed(project.data.video);
 ---
 
 <html lang="en">
   <head>
-    <title>{project.data.title}</title>
+    <title>{project.data.en.title}</title>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
-      body { background: #111; color: white; font-family: sans-serif; margin: 0; }
+      :root { --accent: #4af; }
+      body { background: #111; color: #ddd; font-family: sans-serif; margin: 0; line-height: 1.6; }
       .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
       
-      /* Header Image */
-      .hero-img { width: 100%; height: 400px; object-fit: cover; border-radius: 12px; }
+      /* Video/Image */
+      .media-container { width: 100%; margin-bottom: 2rem; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+      iframe, img { width: 100%; display: block; }
+      .hero-img { height: 400px; object-fit: cover; }
+      .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; }
+      .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+      /* Language Toggle (Same as Home) */
+      .lang-switch { position: fixed; top: 20px; right: 20px; z-index: 100; background: #222; padding: 5px; border-radius: 20px; display: flex; gap: 5px; border: 1px solid #444; }
+      .lang-btn { background: none; border: none; color: #888; padding: 5px 15px; cursor: pointer; border-radius: 15px; font-weight: bold; }
+      .lang-btn.active { background: var(--accent); color: #000; }
+
+      body.show-en .lang-it { display: none !important; }
+      body.show-it .lang-en { display: none !important; }
+
+      h1 { font-size: 3rem; color: white; margin-bottom: 0.5rem; }
+      .date { color: #666; display: block; margin-bottom: 2rem; }
+      .back-link { color: var(--accent); text-decoration: none; display: inline-block; margin-bottom: 1rem; }
       
-      /* Typography */
-      h1 { font-size: 3rem; margin-bottom: 0.5rem; color: #fff; }
-      .date { color: #888; font-size: 0.9rem; margin-bottom: 2rem; display: block; }
-      
-      /* The Markdown Content */
-      .prose { line-height: 1.6; font-size: 1.1rem; color: #ccc; }
-      .prose img { max-width: 100%; border-radius: 8px; margin: 2rem 0; }
-      .prose h2 { color: white; margin-top: 2rem; }
-      
-      /* Back Button */
-      .back-link { display: inline-block; margin-bottom: 2rem; color: #4af; text-decoration: none; }
-      .back-link:hover { text-decoration: underline; }
+      /* Markdown Content Styling */
+      .prose h2 { color: white; margin-top: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
+      .prose a { color: var(--accent); }
+      .prose img { max-width: 100%; border-radius: 8px; }
     </style>
   </head>
-  <body>
+  <body class="show-en">
+    
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('it')">IT</button>
+    </div>
+
     <div class="container">
-      <a href="/" class="back-link">← Back to Portfolio</a>
-      
-      <!-- Cover Image -->
-      <img src={project.data.image} class="hero-img" alt={project.data.title} />
-      
-      <!-- Title & Date -->
-      <h1>{project.data.title}</h1>
-      <span class="date">{project.data.date.toDateString()}</span>
-      
-      <!-- The Main Content (Markdown) -->
-      <div class="prose">
-        <Content />
+      <a href={base} class="back-link">← Back</a>
+
+      <!-- MEDIA SECTION: Video if available, otherwise Image -->
+      <div class="media-container" data-aos="fade-down">
+        {videoId ? (
+          <div class="video-wrapper">
+            <iframe src={`https://www.youtube.com/embed/${videoId}`} frameborder="0" allowfullscreen></iframe>
+          </div>
+        ) : (
+          <img src={project.data.image} class="hero-img" alt="Cover" />
+        )}
+      </div>
+
+      <!-- TEXT SECTION -->
+      <div data-aos="fade-up">
+        <span class="date">{project.data.date.toDateString()}</span>
+
+        <!-- English Block -->
+        <div class="lang-en">
+          <h1>{project.data.en.title}</h1>
+          <div class="prose" set:html={contentEn} />
+        </div>
+
+        <!-- Italian Block -->
+        <div class="lang-it">
+          <h1>{project.data.it.title}</h1>
+          <div class="prose" set:html={contentIt} />
+        </div>
       </div>
     </div>
+
+    <script is:inline src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script is:inline>
+      AOS.init(); 
+
+      function setLang(lang) {
+        document.body.className = 'show-' + lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`button[onclick="setLang('${lang}')"]`).classList.add('active');
+        localStorage.setItem('prefLang', lang);
+      }
+      if(localStorage.getItem('prefLang') === 'it') setLang('it');
+    </script>
   </body>
 </html>

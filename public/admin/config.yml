@@ -16,11 +16,27 @@ collections:
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
-      - {label: "Title", name: "title", widget: "string"}
+      # --- SHARED DATA ---
       - {label: "Publish Date", name: "date", widget: "datetime"}
-      - {label: "Language", name: "lang", widget: "select", options: ["en", "it"], default: "en"}
-      - {label: "Tags", name: "tags", widget: "list", default: ["Game Dev", "Music"]}
       - {label: "Cover Image", name: "image", widget: "image"}
-      - {label: "Short Description", name: "description", widget: "text"}
-      - {label: "Body", name: "body", widget: "markdown"}
+      - {label: "YouTube URL (Optional)", name: "video", widget: "string", required: false}
+      - {label: "Tags", name: "tags", widget: "select", multiple: true, options: ["Game Dev", "Music", "Cinematics", "Code"]}
+      
+      # --- ENGLISH CONTENT ---
+      - label: "English Content"
+        name: "en"
+        widget: "object"
+        fields:
+          - {label: "Title (EN)", name: "title", widget: "string"}
+          - {label: "Short Description (EN)", name: "description", widget: "text"}
+          - {label: "Body (EN)", name: "body", widget: "markdown"}
+
+      # --- ITALIAN CONTENT ---
+      - label: "Italian Content"
+        name: "it"
+        widget: "object"
+        fields:
+          - {label: "Title (IT)", name: "title", widget: "string"}
+          - {label: "Short Description (IT)", name: "description", widget: "text"}
+          - {label: "Body (IT)", name: "body", widget: "markdown"}
 

@@ -1,13 +1,12 @@
 ---
-// 1. Get the data
 import { getCollection } from 'astro:content';
+// 1. Get Data
 const allProjects = await getCollection('projects');
-
-// 2. Sort by date (newest first)
 const sortedProjects = allProjects.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-// 3. Get unique tags for the filter buttons
 const allTags = [...new Set(allProjects.flatMap(project => project.data.tags))];
+
+// 2. Base URL for links
+const base = import.meta.env.BASE_URL;
 ---
 
 <html lang="en">
@@ -15,73 +14,157 @@ const allTags = [...new Set(allProjects.flatMap(project => project.data.tags))];
     <title>My Portfolio</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
     <style>
-      /* Quick CSS for the demo */
-      body { background: #111; color: white; font-family: sans-serif; padding: 2rem; }
+      :root { --bg: #111; --text: #fff; --accent: #4af; }
+      body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; overflow-x: hidden;}
       
-      .filter-bar { margin-bottom: 2rem; display: flex; gap: 10px; }
-      .filter-btn { padding: 8px 16px; background: #333; color: white; border: none; cursor: pointer; border-radius: 4px;}
-      .filter-btn:hover, .filter-btn.active { background: #555; }
+      /* UTILS */
+      .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+      
+      /* LANGUAGE TOGGLE */
+      .lang-switch { position: fixed; top: 20px; right: 20px; z-index: 100; background: #222; padding: 5px; border-radius: 20px; display: flex; gap: 5px; border: 1px solid #444; }
+      .lang-btn { background: none; border: none; color: #888; padding: 5px 15px; cursor: pointer; border-radius: 15px; font-weight: bold; transition: 0.3s; }
+      .lang-btn.active { background: var(--accent); color: #000; }
 
+      /* SHOW/HIDE LOGIC */
+      body.show-en .lang-it { display: none !important; }
+      body.show-it .lang-en { display: none !important; }
+
+      /* HERO / ABOUT ME */
+      .hero { display: flex; align-items: center; gap: 4rem; min-height: 60vh; padding: 4rem 0; }
+      .hero-text { flex: 1; }
+      .hero-text h1 { font-size: 4rem; margin: 0; line-height: 1; }
+      .hero-text h2 { color: var(--accent); font-size: 1.5rem; margin-top: 10px; }
+      .hero-img { width: 300px; height: 300px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent); box-shadow: 0 0 30px rgba(68, 170, 255, 0.3); }
+
+      /* FILTERS */
+      .filter-bar { margin: 2rem 0; display: flex; gap: 10px; flex-wrap: wrap; }
+      .filter-btn { padding: 8px 16px; background: #222; color: #fff; border: 1px solid #333; cursor: pointer; border-radius: 4px; transition: 0.2s; }
+      .filter-btn:hover, .filter-btn.active { background: var(--accent); color: #000; }
+
+      /* GRID */
       .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-      
-      .card { background: #222; border-radius: 8px; overflow: hidden; transition: transform 0.2s; text-decoration: none; color: white; display: block; }
-      .card:hover { transform: translateY(-5px); }
+      .card { background: #1a1a1a; border-radius: 12px; overflow: hidden; text-decoration: none; color: white; border: 1px solid #333; transition: transform 0.3s; display: block; }
+      .card:hover { transform: translateY(-10px); border-color: var(--accent); }
       .card img { width: 100%; height: 200px; object-fit: cover; }
-      .content { padding: 1rem; }
-      .tags { display: flex; gap: 5px; margin-top: 10px; }
-      .tag { font-size: 0.8rem; background: #444; padding: 2px 6px; border-radius: 4px; color: #ccc;}
+      .content { padding: 1.5rem; }
+      .tags { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+      .tag { font-size: 0.7rem; background: #333; padding: 3px 8px; border-radius: 4px; color: #ccc; }
     </style>
   </head>
-  <body>
+  
+  <!-- Default to English -->
+  <body class="show-en">
 
-    <h1>My Games & Music</h1>
-
-    <!-- Filter Buttons -->
-    <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all">All</button>
-      {allTags.map((tag) => (
-        <button class="filter-btn" data-filter={tag}>{tag}</button>
-      ))}
+    <!-- LANGUAGE SWITCHER -->
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('it')">IT</button>
     </div>
 
-    <!-- The Grid -->
-    <div class="grid">
-      {sortedProjects.map((project) => (
-        <a href={`/projects/${project.slug}`} class="card project-item" data-tags={project.data.tags.join(',')}>
-          <img src={project.data.image} alt={project.data.title} />
-          <div class="content">
-            <h3>{project.data.title}</h3>
-            <p>{project.data.description}</p>
-            <div class="tags">
-              {project.data.tags.map(tag => <span class="tag">{tag}</span>)}
+    <div class="container">
+      
+      <!-- HERO SECTION (About Me) -->
+      <!-- data-aos="fade-up" adds the scroll animation -->
+      <section class="hero" data-aos="fade-up">
+        <div class="hero-text">
+          <span class="lang-en">Hello, I'm</span>
+          <span class="lang-it">Ciao, sono</span>
+          <h1>Your Name</h1>
+          
+          <h2 class="lang-en">Game Developer & Composer</h2>
+          <h2 class="lang-it">Sviluppatore di Videogiochi e Compositore</h2>
+          
+          <p class="lang-en">I create immersive worlds using code and sound. Welcome to my digital portfolio.</p>
+          <p class="lang-it">Creo mondi immersivi usando codice e suoni. Benvenuti nel mio portfolio digitale.</p>
+        </div>
+        <!-- Replace with your actual photo path -->
+        <img src="/uploads/your-photo.jpg" class="hero-img" alt="Me" data-aos="zoom-in" />
+      </section>
+
+      <!-- TAG FILTERS -->
+      <div class="filter-bar" data-aos="fade-right">
+        <button class="filter-btn active" data-filter="all">All</button>
+        {allTags.map((tag) => (
+          <button class="filter-btn" data-filter={tag}>{tag}</button>
+        ))}
+      </div>
+
+      <!-- PROJECTS GRID -->
+      <div class="grid">
+        {sortedProjects.map((project, index) => (
+          <a href={`${base}projects/${project.slug}`} 
+             class="card project-item" 
+             data-tags={project.data.tags.join(',')}
+             data-aos="fade-up" 
+             data-aos-delay={index * 100}> <!-- Staggered animation -->
+            
+            <img src={project.data.image} alt="Cover" />
+            
+            <div class="content">
+              <!-- ENGLISH TITLE/DESC -->
+              <div class="lang-en">
+                <h3>{project.data.en.title}</h3>
+                <p>{project.data.en.description}</p>
+              </div>
+              
+              <!-- ITALIAN TITLE/DESC -->
+              <div class="lang-it">
+                <h3>{project.data.it.title}</h3>
+                <p>{project.data.it.description}</p>
+              </div>
+
+              <div class="tags">
+                {project.data.tags.map(tag => <span class="tag">{tag}</span>)}
+              </div>
             </div>
-          </div>
-        </a>
-      ))}
+          </a>
+        ))}
+      </div>
+
     </div>
 
-    <script>
-      // CLIENT SIDE FILTERING LOGIC
+    <!-- SCRIPTS -->
+    <script is:inline src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script is:inline>
+      // 1. Init Animations
+      AOS.init({ duration: 800, once: true });
+
+      // 2. Language Logic
+      function setLang(lang) {
+        document.body.className = 'show-' + lang;
+        // Update buttons styling
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`button[onclick="setLang('${lang}')"]`).classList.add('active');
+        // Save preference (Optional)
+        localStorage.setItem('prefLang', lang);
+      }
+
+      // Check saved lang on load
+      if(localStorage.getItem('prefLang') === 'it') setLang('it');
+
+      // 3. Filter Logic (Existing)
       const buttons = document.querySelectorAll('.filter-btn');
       const items = document.querySelectorAll('.project-item');
 
       buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-          // Remove active class from all
           buttons.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-
           const filter = btn.getAttribute('data-filter');
-
           items.forEach(item => {
             const tags = item.getAttribute('data-tags');
             if (filter === 'all' || tags.includes(filter)) {
-              (item as HTMLElement).style.display = 'block';
+              item.style.display = 'block';
             } else {
-              (item as HTMLElement).style.display = 'none';
+              item.style.display = 'none';
             }
           });
+          // Refresh animations after filter
+          setTimeout(() => AOS.refresh(), 100);
         });
       });
     </script>
